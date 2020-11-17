@@ -1,0 +1,46 @@
+/* Configurações Iniciais */
+    @font-face {
+        font-family: Montserrat;
+        src: url(../_fonts/Montserrat-Regular.ttf);
+    }
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        --yellow: hsla(59, 100%, 60%, 1);
+        --black: hsla(223, 30%, 5%, 1);
+        --blue-dark: hsla(231, 81%, 8%, 1);
+        --violet: hsla(257, 62%, 20%, 1);
+        --ivory: hsla(65, 43%, 95%, 1);
+    }
+    body {
+        margin: 0;
+        user-select: none;
+    }
+    #wrap {
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background-color: var(--yellow);
+    }
+/****/
+/* Barra de Título */
+    #title-bar {
+        width: 100%;
+        height: 40px;
+        display: flex;
+        flex-direction: row;
+        background-color: var(--black);
+    }
+    #title-bar h1 {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 5px;
+        flex-grow: 1;
+        color: var(--ivory);
+        font-family: Montserrat;
+        font-size: 1em;
+    }
+/****/
