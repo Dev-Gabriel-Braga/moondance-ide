@@ -10,12 +10,41 @@
     <!-- Componentes Gráficos -->
     <body>
         <div id="wrap">
+            <!-- Barra de Menu -->
             <header id="title-bar">
                 <h1>
-                    <img src="../_img/md-logo-30x30.png"/>
-                    &nbsp;&nbsp;Moondance IDE
+                    <img src="../_img/md-logo-20x20.png"/>
+                    Moondance IDE
                 </h1>
+                <div id="min" class="ctr-button">
+                    <img src="../_img/ctr-min-25x25.png"/>
+                </div>
+                <div id="max" class="ctr-button">
+                    <img src="../_img/ctr-max-25x25.png"/>
+                </div>
+                <div id="clo" class="ctr-button">
+                    <img src="../_img/ctr-clo-25x25.png"/>
+                </div>
             </header>
+
+            <!-- Área de conteúdo -->
+            <div id="content-area">
+                <!-- Painel de Sistema de Pastas -->
+                <div id="folder-panel"></div>
+
+                <!-- Editor Embutido (Ace Editor) -->
+                <div id="editor-panel">
+                    <div id="editor"></div>
+                </div>
+            </div>
         </div>
+
+        <script src="../../_model/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript">
+            var editor = ace.edit("editor");
+            editor.setTheme("ace/theme/dracula");
+            editor.session.setMode("ace/mode/php");
+            editor.session.setUseWrapMode(true);
+        </script>
     </body>
 </html>
