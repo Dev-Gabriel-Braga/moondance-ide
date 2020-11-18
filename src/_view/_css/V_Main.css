@@ -13,22 +13,27 @@
         --blue-light: hsla(240, 100%, 80%, 1);
         --red: hsla(0, 100%, 60%, 1);
         --red-light: hsla(0, 100%, 80%, 1);
-        --black: hsla(223, 30%, 5%, 1);
+        --black: hsla(223, 30%, 10%, 1);
         --black-light: hsla(223, 30%, 15%, 1);
+        --black-lighter: hsla(223, 30%, 25%, 1);
+        --black-pluslighter: hsla(223, 20%, 35%, 1);
         --blue-dark: hsla(231, 81%, 8%, 1);
         --violet: hsla(257, 62%, 20%, 1);
+        --violet-light: hsla(257, 62%, 30%, 1);
+        --violet-lighter: hsla(257, 62%, 40%, 1);
         --ivory: hsla(65, 43%, 95%, 1);
     }
     body {
         margin: 0;
         user-select: none;
+        font-family: Montserrat;
+        background-color: var(--ivory);
     }
     #wrap {
         width: 100%;
         height: 100vh;
         display: flex;
         flex-direction: column;
-        background-color: var(--yellow);
     }
 /****/
 /* Barra de Título */
@@ -45,7 +50,6 @@
         align-items: center;
         flex-grow: 1;
         color: var(--ivory);
-        font-family: Montserrat;
         font-size: 1em;
     }
     #title-bar h1 img {
@@ -66,24 +70,92 @@
 /* Área de Conteúdo */
     #content-area {
         flex-grow: 1;
-        background-color: brown;
         display: flex;
         flex-direction: row;
+        --folder-panel-w: 270px;
+        --footer-bars-w: 25px;
     }
     #folder-panel {
-        width: 270px;
-        background-color: coral;
+        display: flex;
+        flex-direction: column;
+        width: var(--folder-panel-w);
+        border-right: 5px solid var(--black);
+    }
+    #root-folder {
+        padding: 15px;
+        color: var(--ivory);
+        font-size: 1.2em;
+        text-align: center;
+        background-color: var(--black-light);
+        border-bottom: 5px solid var(--black);
+    }
+    #folder-tree {
+        flex-grow: 1;
+        background-color: var(--black-pluslighter);
+    }
+    #operation-bar {
+        width: 100%;
+        height: var(--footer-bars-w);
+        background-color: var(--black);
     }
     #editor-panel {
-        position: relative;
-        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        width: calc(100% - var(--folder-panel-w));
     }
-    #editor-panel #editor {
+    #tabs {
+        width: 100%;
+        height: fit-content;
+        display: flex;
+        flex-direction: row;
+        background-color: var(--black-lighter);
+        overflow-x: scroll;
+    }
+    #tabs::-webkit-scrollbar { 
+        height: 8px;
+        background-color: var(--black-light);
+    }
+    #tabs::-webkit-scrollbar-button { display: none; }
+    #tabs::-webkit-scrollbar-thumb { background-color: var(--ivory); }
+    #tabs .tab {
+        width: fit-content;
+        height: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 7px 15px;
+        color: var(--ivory);
+        font-weight: 550;
+        background-color: var(--black-lighter);
+        border-right: 2px solid var(--black-light);
+    }
+    #tabs .tab.selected {
+        background-color: var(--black-light);
+    }
+    #tabs .tab .x { cursor: pointer; }
+    #tabs .tab .x::before {
+        content: "×";
+        font-style: normal;
+        font-weight: 300;
+        font-size: 1.9em;
+        padding-left: 15px;
+    }
+    #ace-container {
+        width: 100%;
+        flex-grow: 1;
+        position: relative;
+    }
+    #ace-editor {
         position: absolute;
         top: 0;
         right: 0;
-        bottom: 0;
         left: 0;
+        bottom: 0;
         font-size: 1.25em;
+    }
+    #status-bar {
+        width: 100%;
+        height: var(--footer-bars-w);
+        background-color: var(--black);
     }
 /****/

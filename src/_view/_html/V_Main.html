@@ -30,21 +30,52 @@
             <!-- Área de conteúdo -->
             <div id="content-area">
                 <!-- Painel de Sistema de Pastas -->
-                <div id="folder-panel"></div>
+                <div id="folder-panel">
+                    <!-- Pasta raiz -->
+                    <h2 id="root-folder">pasta_raiz</h2>
 
-                <!-- Editor Embutido (Ace Editor) -->
-                <div id="editor-panel">
-                    <div id="editor"></div>
+                    <!-- Árvore de Arquivos -->
+                    <div id="folder-tree">
+                        
+                    </div>
+
+                    <!-- Barra de Operações -->
+                    <div id="operation-bar">
+
+                    </div>
                 </div>
+
+                <!-- Painel de Edição -->
+                <div id="editor-panel">
+                    <!-- Abas de Arquivos -->
+                    <div id="tabs">
+                        <div class="tab selected">
+                            Document_num1_revised.moge
+                            <i class="x"></i>
+                        </div>
+                        <div class="tab">
+                            Document_num2_revised.moge
+                            <i class="x"></i>
+                        </div>
+                        <div class="tab">
+                            Document_dontread_revised.moge
+                            <i class="x"></i>
+                        </div>
+                       
+                    </div>
+
+                    <!-- Editor Embutido (Ace Editor) -->
+                    <div id="ace-container">
+                        <div id="ace-editor"></div>
+                    </div>
+
+                    <!-- Barra de Status -->
+                    <div id="status-bar">
+
+                    </div>
+                </div>
+
             </div>
         </div>
-
-        <script src="../../_model/ace/ace.js" type="text/javascript" charset="utf-8"></script>
-        <script type="text/javascript">
-            var editor = ace.edit("editor");
-            editor.setTheme("ace/theme/dracula");
-            editor.session.setMode("ace/mode/php");
-            editor.session.setUseWrapMode(true);
-        </script>
     </body>
 </html>
