@@ -52,6 +52,7 @@
         flex-grow: 1;
         color: var(--ivory);
         font-size: 1em;
+        -webkit-app-region: drag;
     }
     #title-bar h1 img {
         padding: 10px;
