@@ -2,9 +2,9 @@
   "name": "moondance-ide",
   "version": "0.0.1",
   "description": "Uma IDE para a linguagem de marcação de anotações Moge.",
-  "main": "C_Main.js",
+  "main": "./src/_controller/C_Main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "electron ./src/_controller/C_Main.js"
   },
   "repository": {
     "type": "git",
