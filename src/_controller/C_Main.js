@@ -23,6 +23,8 @@ class C_Main {
         this.v_mainWindow = new BrowserWindow({
             width: 1280,
             height: 720,
+            minWidth: 600,
+            minHeight: 400,
             frame: false,
             webPreferences: {
                 nodeIntegration: true,
@@ -31,6 +33,7 @@ class C_Main {
         });
         this.v_mainWindow.loadFile('../_view/_html/V_MainWindow.html');
         this.v_mainWindow.removeMenu();
+        this.v_mainWindow.openDevTools();
     }
 }
 
