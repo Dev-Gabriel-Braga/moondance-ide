@@ -1,6 +1,6 @@
 // Importanto Bicliotecas
 const { remote } = require('electron');
-//const FileSystemManager = require('../_model/fsm/FileSystemManager');
+const FileSystemManager = require('../../_model/fsm/FileSystemManager');
 
 // Definindo Classe
 class C_MainWindow {
@@ -15,12 +15,12 @@ class C_MainWindow {
     static btn_create_dir;
     static btn_delete;
     static btn_open;
-    //static fsm;
+    static fsm;
 
     // Método Principal
     static main() {
         // Instanciando objeto Gerencidador de Sistemas de Arquivos
-        //this.fsm = new FileSystemManager();
+        this.fsm = new FileSystemManager();
 
         // Programando eventos da barra de título
         this.btn_min = document.getElementById('min');
@@ -53,7 +53,9 @@ class C_MainWindow {
         remote.dialog.showOpenDialog({
             properties: ['openDirectory']
         }).then((res) => {
-            // Precisa Implementar
+            // Salvando pasta aberta e gerando árvore de arquivos
+            C_MainWindow.fsm.currentDir = res.filePaths[0];
+            C_MainWindow.fsm.fileTree = C_MainWindow.fsm.buildFileTree();
         });
     }
 }
