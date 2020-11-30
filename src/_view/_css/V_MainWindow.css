@@ -128,7 +128,7 @@
         cursor: pointer;
         white-space: nowrap;
     }
-    #folder-tree .dir .name:hover, #folder-tree .file:hover {
+    #folder-tree .dir.selected > .name, #folder-tree .file.selected {
         font-weight: 800;
         color: var(--yellow);
     }

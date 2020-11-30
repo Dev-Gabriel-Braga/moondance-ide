@@ -15,10 +15,11 @@ class C_MainWindow {
     static btn_create_dir;
     static btn_delete;
     static btn_open;
+    static btn_delete;
     static pn_root_folder;
     static pn_folder_tree;
-    static dirs;
-    static files;
+    static fileTreeElements;
+    static lastFTE = -1;
     static currentDir = null;
     static fsm;
 
@@ -34,6 +35,7 @@ class C_MainWindow {
         this.pn_root_folder = document.getElementById('root-folder');
         this.pn_folder_tree = document.getElementById('folder-tree');
         this.btn_open = document.getElementById('btn-open');
+        this.btn_delete = document.getElementById('btn-delete');
 
         // Programando eventos da barra de título
         this.btn_min.addEventListener('click', this.btn_minOnClick);
@@ -42,7 +44,7 @@ class C_MainWindow {
 
         // Programando eventos do Painel de Sistema de Pastas
         this.btn_open.addEventListener('click', this.btn_openOnClick);
-
+        this.btn_delete.addEventListener('click', this.btn_deleteOnClick);
     }
 
     // Métodos de Eventos DOOM
@@ -69,16 +71,7 @@ class C_MainWindow {
             C_MainWindow.pn_folder_tree.innerHTML = C_MainWindow.loadFileTree(C_MainWindow.fsm.buildFileTree(C_MainWindow.currentDir.realPath));
 
             // Programando eventos dos elementos da árvore
-            C_MainWindow.dirs = C_MainWindow.pn_folder_tree.getElementsByClassName('dir');
-            for (let i = 0; i < C_MainWindow.dirs.length; i++) {
-                C_MainWindow.dirs[i].children[0].addEventListener('click', () => {
-                    if (C_MainWindow.dirs[i].classList.contains('hidden')) {
-                        C_MainWindow.dirs[i].classList.remove('hidden');
-                    } else {
-                        C_MainWindow.dirs[i].classList.add('hidden');
-                    }
-                });
-            }
+            C_MainWindow.fileTreeElementsOnClick();
         });
     }
     static loadFileTree(fileTree) {
@@ -97,6 +90,56 @@ class C_MainWindow {
             }
         });
         return html_result;
+    }
+    static fileTreeElementsOnClick() {
+        C_MainWindow.fileTreeElements = C_MainWindow.pn_folder_tree.querySelectorAll('.dir, .file');
+        for (let i = 0; i < C_MainWindow.fileTreeElements.length; i++) {
+            // Verificando o tipo do elemento
+            if (C_MainWindow.fileTreeElements[i].classList.contains('dir')) {
+                C_MainWindow.fileTreeElements[i].children[0].addEventListener('click', () => {
+                    // Fazendo seleção
+                    if (i != C_MainWindow.lastFTE) {
+                        C_MainWindow.fileTreeElements[i].classList.add('selected');
+                        if (C_MainWindow.lastFTE != -1) {
+                            C_MainWindow.fileTreeElements[C_MainWindow.lastFTE].classList.remove('selected');
+                        }
+                        C_MainWindow.lastFTE = i;
+                    }
+                    if (C_MainWindow.fileTreeElements[i].classList.contains('hidden')) {
+                        C_MainWindow.fileTreeElements[i].classList.remove('hidden');
+                    } else {
+                        C_MainWindow.fileTreeElements[i].classList.add('hidden');
+                    }
+                });
+            } else {
+                C_MainWindow.fileTreeElements[i].addEventListener('click', () => {
+                    // Fazendo seleção
+                    if (i != C_MainWindow.lastFTE) {
+                        C_MainWindow.fileTreeElements[i].classList.add('selected');
+                        if (C_MainWindow.lastFTE != -1) {
+                            C_MainWindow.fileTreeElements[C_MainWindow.lastFTE].classList.remove('selected');
+                        }
+                        C_MainWindow.lastFTE = i;
+                    }
+                });
+            }
+        }
+    }
+    static btn_deleteOnClick() {
+        if (C_MainWindow.lastFTE != -1) {
+           let tempE = C_MainWindow.fileTreeElements[C_MainWindow.lastFTE];
+
+            // Deletando Arquivo
+            if (tempE.classList.contains('dir')) {
+                C_MainWindow.fsm.deleteDir(tempE.getAttribute('real-path'));
+            } else {
+                C_MainWindow.fsm.deleteFile(tempE.getAttribute('real-path'));
+            }
+            
+
+            // Removendo elemento gráfico do Painel de Sistema de Pasta
+            tempE.remove();
+        }
     }
 }
 

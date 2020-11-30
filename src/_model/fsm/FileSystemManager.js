@@ -6,9 +6,24 @@ const DirModel = require('./DirModel');
 
 // Definindo Classe
 class FileSystemManager {
-    // Métodos Leitura
-    decompPath(realPath) { return { name: path.basename(realPath), realPath: realPath }; }
+    // Métodos de Manipulação de arquivos
     readFile(realPath) { return fs.readFileSync(realPath).toString(); }
+    deleteFile(realPath) { fs.unlinkSync(realPath) }
+    deleteDir(realPath) {
+        let sub = fs.readdirSync(realPath);
+        for (let i = 0; i < sub.length; i++) {
+            let subPath = path.join(realPath, sub[i]);
+            if (fs.lstatSync(subPath).isDirectory()) {
+                this.deleteDir(subPath);
+            } else {
+                this.deleteFile(subPath);
+            }
+        }
+        fs.rmdirSync(realPath);
+    }
+    
+    // Métodos Formatação
+    decompPath(realPath) { return { name: path.basename(realPath), realPath: realPath }; }
     buildFileTree(dir) {
         let files = [];
         let dirs = [];
