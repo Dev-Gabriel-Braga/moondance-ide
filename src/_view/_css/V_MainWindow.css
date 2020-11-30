@@ -7,6 +7,8 @@
         margin: 0;
         padding: 0;
         box-sizing: border-box;
+    }
+    :root {
         --yellow: hsla(59, 100%, 60%, 1);
         --yellow-light: hsla(59, 100%, 80%, 1);
         --blue: hsla(240, 100%, 60%, 1);
@@ -21,9 +23,17 @@
         --blue-dark: hsla(231, 81%, 8%, 1);
         --violet: hsla(257, 62%, 20%, 1);
         --violet-light: hsla(257, 62%, 30%, 1);
-        --violet-lighter: hsla(257, 62%, 40%, 1);
+        --violet-lighter: hsla(257, 100%, 58%, 1);
         --ivory: hsla(65, 43%, 95%, 1);
+        
     }
+    ::-webkit-scrollbar { 
+        height: 8px;
+        width: 8px;
+        background-color: var(--black-light);
+    }
+    ::-webkit-scrollbar-button { display: none; }
+    ::-webkit-scrollbar-thumb { background-color: var(--ivory); }
     body {
         margin: 0;
         user-select: none;
@@ -75,7 +85,7 @@
         display: flex;
         flex-direction: row;
         --folder-panel-w: 270px;
-        --footer-bars-w: 30px;
+        --footer-bars-h: 30px;
     }
     #folder-panel {
         display: flex;
@@ -84,6 +94,10 @@
         border-right: 5px solid var(--black);
     }
     #root-folder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 53px;
         padding: 10px;
         color: var(--ivory);
         font-size: 1.1em;
@@ -93,11 +107,46 @@
     }
     #folder-tree {
         flex-grow: 1;
+        height: calc(100vh - 93px - var(--footer-bars-h));
         background-color: var(--black-pluslighter);
+        padding: 15px;
+        overflow: auto;
+    }
+    #folder-tree::-webkit-scrollbar {
+        background-color: var(--black-lighter);
+    }
+    #folder-tree .dir .content {
+        padding-left: 15px;
+    }
+    #folder-tree .dir.hidden .content {
+        display: none;
+    }
+    #folder-tree .dir .name, #folder-tree .file {
+        font-size: 1em;
+        color: var(--black-evmolighter);
+        padding-bottom: 10px;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    #folder-tree .dir .name:hover, #folder-tree .file:hover {
+        font-weight: 800;
+        color: var(--yellow);
+    }
+    #folder-tree .dir .name::before { 
+        content: url(../_img/dir-opened-16x16.png);
+    }
+    #folder-tree .dir.hidden .name::before { 
+        content: url(../_img/dir-closed-16x16.png);
+    }
+    #folder-tree .file::before {
+        content: url(../_img/doc-16x16.png);
+    }
+    #folder-tree .dir .name::before, #folder-tree .file::before {
+        padding-right: 5px;
     }
     #operation-bar {
         width: 100%;
-        height: var(--footer-bars-w);
+        height: var(--footer-bars-h);
         display: flex;
         flex-direction: row;
         background-color: var(--black);
@@ -125,12 +174,6 @@
         background-color: var(--black-lighter);
         overflow-x: scroll;
     }
-    #tabs::-webkit-scrollbar { 
-        height: 8px;
-        background-color: var(--black-light);
-    }
-    #tabs::-webkit-scrollbar-button { display: none; }
-    #tabs::-webkit-scrollbar-thumb { background-color: var(--ivory); }
     #tabs .tab {
         width: fit-content;
         height: 100%;
@@ -169,7 +212,7 @@
     }
     #status-bar {
         width: 100%;
-        height: var(--footer-bars-w);
+        height: var(--footer-bars-h);
         display: flex;
         flex-direction: row;
         justify-content: flex-end;

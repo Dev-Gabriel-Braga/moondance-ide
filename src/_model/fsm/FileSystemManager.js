@@ -6,16 +6,12 @@ const DirModel = require('./DirModel');
 
 // Definindo Classe
 class FileSystemManager {
-    // Método Construtor
-    constructor() {
-        this.currentDir = null;
-        this.fileTree = [];
-    }
-
-    // Métodos Especiais
-    readFile(realPath) { return fs.readFileSync(this.currentDir + "/" + realPath).toString(); }
-    buildFileTree(dir = this.currentDir) {
-        let tempFT = [];
+    // Métodos Leitura
+    decompPath(realPath) { return { name: path.basename(realPath), realPath: realPath }; }
+    readFile(realPath) { return fs.readFileSync(realPath).toString(); }
+    buildFileTree(dir) {
+        let files = [];
+        let dirs = [];
         let tempFL = fs.readdirSync(dir);
 
         // Vasculhando lista de elementos do diretório
@@ -23,13 +19,12 @@ class FileSystemManager {
             let realPath = path.join(dir, v);
             // Verificando se o elemento é um diretório ou um arquivo
             if (fs.lstatSync(realPath).isDirectory()) {
-                tempFT.push(new DirModel(v, realPath, this.buildFileTree(realPath)));
+                dirs.push(new DirModel(v, realPath, this.buildFileTree(realPath)));
             } else {
-                tempFT.push(new FileModel(v, realPath));
+                files.push(new FileModel(v, realPath));
             }
         });
-
-        return tempFT;
+        return dirs.concat(files);
     }
 }
 
