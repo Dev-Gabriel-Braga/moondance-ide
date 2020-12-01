@@ -9,6 +9,10 @@ class FileSystemManager {
     // Métodos de Manipulação de arquivos
     createFile(fileName, dir) {
         let file = new FileModel(fileName, path.join(dir, fileName));
+        while (fs.existsSync(file.realPath)) {
+            console.log(file.realPath);
+            file = this.addCopyPrefix(file.name, file.realPath.slice(0, file.realPath.length - file.name.length));
+        }
         fs.writeFileSync(file.realPath, "", { encoding: "utf-8" });
         return file;
     }
@@ -25,6 +29,11 @@ class FileSystemManager {
             }
         }
         fs.rmdirSync(realPath);
+    }
+    addCopyPrefix(fileName, dir) {
+        let lio = (fileName.lastIndexOf('.') <= 0) ? fileName.length : fileName.lastIndexOf('.');
+        fileName = fileName.slice(0, lio).concat('-copy').concat(fileName.slice(lio));
+        return new FileModel(fileName, path.join(dir, fileName));
     }
     
     // Métodos Formatação

@@ -18,7 +18,6 @@ class C_MainWindow {
     static btn_delete;
     static pn_root_folder;
     static pn_folder_tree;
-    static fileTreeElements;
     static lastFTE = null;
     static currentDir = null;
     static fsm;
@@ -44,6 +43,7 @@ class C_MainWindow {
         this.btn_clo.addEventListener('click', this.btn_cloOnClick);
 
         // Programando eventos do Painel de Sistema de Pastas
+        this.pn_folder_tree.addEventListener('focus', this.pn_folder_treeOnFocus);
         this.btn_create_file.addEventListener('click', this.btn_create_fileOnClick);
         this.btn_open.addEventListener('click', this.btn_openOnClick);
         this.btn_delete.addEventListener('click', this.btn_deleteOnClick);
@@ -71,6 +71,7 @@ class C_MainWindow {
                 // Salvando pasta aberta e gerando árvore de arquivos
                 C_MainWindow.currentDir = C_MainWindow.fsm.decompPath(res.filePaths[0]);
                 C_MainWindow.pn_root_folder.innerText = C_MainWindow.currentDir.name;
+                C_MainWindow.pn_folder_tree.innerHTML = '';
                 C_MainWindow.loadFileTree(C_MainWindow.fsm.buildFileTree(C_MainWindow.currentDir.realPath)).forEach((node) => {
                     C_MainWindow.pn_folder_tree.appendChild(node);
                 });
@@ -93,19 +94,17 @@ class C_MainWindow {
         let file = document.createElement('div');
         file.setAttribute('class', 'file');
         file.setAttribute('real-path', f.realPath);
+        file.setAttribute('tabindex', '0');
         file.innerText = f.name;
 
         // Definindo eventos
-        file.addEventListener('click', () => {
+        file.addEventListener('focus', () => {
             // Fazendo seleção
             if (!file.isSameNode(C_MainWindow.lastFTE)) {
-                file.classList.add('selected');
-                if (C_MainWindow.lastFTE != null) {
-                    C_MainWindow.lastFTE.classList.remove('selected');
-                }
                 C_MainWindow.lastFTE = file;
             }
         });
+        file.addEventListener('blur', C_MainWindow.sfeOnBlur);
         return file; 
     }
     static loadDir(d) {
@@ -115,6 +114,7 @@ class C_MainWindow {
         dir.setAttribute('real-path', d.realPath);
         let name = document.createElement('h3');
         name.setAttribute('class', 'name');
+        name.setAttribute('tabindex', '0');
         name.innerText = d.name;
         let content = document.createElement('div');
         content.setAttribute('class', 'content');
@@ -125,15 +125,14 @@ class C_MainWindow {
         dir.appendChild(content);
 
         // Definindo Eventos
-        dir.children[0].addEventListener('click', () => {
+        dir.children[0].addEventListener('focus', () => {
             // Fazendo seleção
             if (!dir.isSameNode(C_MainWindow.lastFTE)) {
-                dir.classList.add('selected');
-                if (C_MainWindow.lastFTE != null) {
-                    C_MainWindow.lastFTE.classList.remove('selected');
-                }
+                console.log('funcional');
                 C_MainWindow.lastFTE = dir;
             }
+        });
+        dir.children[0].addEventListener('click', () => {
             if (dir.classList.contains('hidden')) {
                 dir.classList.remove('hidden');
             } else {
@@ -167,16 +166,43 @@ class C_MainWindow {
                 input.addEventListener('blur', () => {
                     if (input.value != '') {
                         let file = C_MainWindow.fsm.createFile(input.value, C_MainWindow.lastFTE.getAttribute('real-path'));
-                        
-                        // Refazendo árvore
                         C_MainWindow.lastFTE.children[1].appendChild(C_MainWindow.loadFile(file));
                     }
                     input.remove();
                 });
+                input.addEventListener('keyup', (e) => {
+                    if (e.key == 'Enter') {
+                        input.blur();
+                    }
+                })
                 C_MainWindow.lastFTE.children[1].appendChild(input);
+                input.focus();
+            } else if (C_MainWindow.lastFTE.id == 'folder-tree') {
+                let input = document.createElement('input');
+                input.addEventListener('blur', () => {
+                    if (input.value != '') {
+                        let file = C_MainWindow.fsm.createFile(input.value, C_MainWindow.currentDir.realPath);
+                        C_MainWindow.lastFTE.appendChild(C_MainWindow.loadFile(file));
+                    }
+                    input.remove();
+                });
+                input.addEventListener('keyup', (e) => {
+                    if (e.key == 'Enter') {
+                        input.blur();
+                    }
+                })
+                C_MainWindow.lastFTE.appendChild(input);
                 input.focus();
             }
         }
+    }
+    static pn_folder_treeOnFocus() {
+        if (!C_MainWindow.pn_folder_tree.isSameNode(C_MainWindow.lastFTE)) {
+            C_MainWindow.lastFTE = C_MainWindow.pn_folder_tree;
+        }
+    }
+    static sfeOnBlur() {
+        C_MainWindow.lastFTE = null;
     }
 }
 

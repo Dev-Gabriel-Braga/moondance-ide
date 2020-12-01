@@ -112,6 +112,10 @@
         padding: 15px;
         overflow: auto;
     }
+    #folder-tree:focus {
+        border: 2px solid var(--yellow);
+        outline: none;
+    }
     #folder-tree::-webkit-scrollbar {
         background-color: var(--black-lighter);
     }
@@ -128,9 +132,10 @@
         cursor: pointer;
         white-space: nowrap;
     }
-    #folder-tree .dir.selected > .name, #folder-tree .file.selected {
+    #folder-tree .dir .name:focus, #folder-tree .file:focus {
         font-weight: 800;
         color: var(--yellow);
+        outline: none;
     }
     #folder-tree .dir .name::before { 
         content: url(../_img/dir-opened-16x16.png);
