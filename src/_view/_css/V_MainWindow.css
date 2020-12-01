@@ -144,6 +144,19 @@
     #folder-tree .dir .name::before, #folder-tree .file::before {
         padding-right: 5px;
     }
+    #folder-tree input {
+        width: 150px;
+        padding: 5px;
+        margin-bottom: 10px;
+        background-color: var(--black-pluslighter);
+        border: 2px solid var(--black-evmolighter);
+        border-radius: 5px;
+        outline: none;
+        font-size: 1em;
+        font-family: Montserrat;
+        font-weight: 700;
+        color: var(--black-evmolighter);
+    }
     #operation-bar {
         width: 100%;
         height: var(--footer-bars-h);

@@ -7,6 +7,11 @@ const DirModel = require('./DirModel');
 // Definindo Classe
 class FileSystemManager {
     // Métodos de Manipulação de arquivos
+    createFile(fileName, dir) {
+        let file = new FileModel(fileName, path.join(dir, fileName));
+        fs.writeFileSync(file.realPath, "", { encoding: "utf-8" });
+        return file;
+    }
     readFile(realPath) { return fs.readFileSync(realPath).toString(); }
     deleteFile(realPath) { fs.unlinkSync(realPath) }
     deleteDir(realPath) {

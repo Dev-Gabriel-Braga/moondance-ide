@@ -11,7 +11,7 @@ class C_MainWindow {
     static btn_clo;
 
     // Painel de Sistemas de Pastas
-    static btn_create_doc;
+    static btn_create_file;
     static btn_create_dir;
     static btn_delete;
     static btn_open;
@@ -19,7 +19,7 @@ class C_MainWindow {
     static pn_root_folder;
     static pn_folder_tree;
     static fileTreeElements;
-    static lastFTE = -1;
+    static lastFTE = null;
     static currentDir = null;
     static fsm;
 
@@ -34,6 +34,7 @@ class C_MainWindow {
         this.btn_clo = document.getElementById('clo');
         this.pn_root_folder = document.getElementById('root-folder');
         this.pn_folder_tree = document.getElementById('folder-tree');
+        this.btn_create_file = document.getElementById('btn-create-file');
         this.btn_open = document.getElementById('btn-open');
         this.btn_delete = document.getElementById('btn-delete');
 
@@ -43,6 +44,7 @@ class C_MainWindow {
         this.btn_clo.addEventListener('click', this.btn_cloOnClick);
 
         // Programando eventos do Painel de Sistema de Pastas
+        this.btn_create_file.addEventListener('click', this.btn_create_fileOnClick);
         this.btn_open.addEventListener('click', this.btn_openOnClick);
         this.btn_delete.addEventListener('click', this.btn_deleteOnClick);
     }
@@ -65,80 +67,115 @@ class C_MainWindow {
         remote.dialog.showOpenDialog({
             properties: ['openDirectory']
         }).then((res) => {
-            // Salvando pasta aberta e gerando árvore de arquivos
-            C_MainWindow.currentDir = C_MainWindow.fsm.decompPath(res.filePaths[0]);
-            C_MainWindow.pn_root_folder.innerText = C_MainWindow.currentDir.name;
-            C_MainWindow.pn_folder_tree.innerHTML = C_MainWindow.loadFileTree(C_MainWindow.fsm.buildFileTree(C_MainWindow.currentDir.realPath));
-
-            // Programando eventos dos elementos da árvore
-            C_MainWindow.fileTreeElementsOnClick();
+            if (res.filePaths[0] != undefined) {
+                // Salvando pasta aberta e gerando árvore de arquivos
+                C_MainWindow.currentDir = C_MainWindow.fsm.decompPath(res.filePaths[0]);
+                C_MainWindow.pn_root_folder.innerText = C_MainWindow.currentDir.name;
+                C_MainWindow.loadFileTree(C_MainWindow.fsm.buildFileTree(C_MainWindow.currentDir.realPath)).forEach((node) => {
+                    C_MainWindow.pn_folder_tree.appendChild(node);
+                });
+            }
         });
     }
     static loadFileTree(fileTree) {
-        let html_result = '';
+        let tempNL = [];
         fileTree.forEach((v) => {
             if (v.content == undefined) {
-                html_result += `<div class="file" real-path="${v.realPath}">${v.name}</div>`;
+               tempNL.push(C_MainWindow.loadFile(v));
             } else {
-                html_result += `
-                <div class="dir hidden" real-path="${v.realPath}">
-                    <h3 class="name">${v.name}</h3>
-                    <div class="content">
-                        ${C_MainWindow.loadFileTree(v.content)}
-                    </div>
-                </div>`;
+                tempNL.push(C_MainWindow.loadDir(v));
             }
         });
-        return html_result;
+        return tempNL;
     }
-    static fileTreeElementsOnClick() {
-        C_MainWindow.fileTreeElements = C_MainWindow.pn_folder_tree.querySelectorAll('.dir, .file');
-        for (let i = 0; i < C_MainWindow.fileTreeElements.length; i++) {
-            // Verificando o tipo do elemento
-            if (C_MainWindow.fileTreeElements[i].classList.contains('dir')) {
-                C_MainWindow.fileTreeElements[i].children[0].addEventListener('click', () => {
-                    // Fazendo seleção
-                    if (i != C_MainWindow.lastFTE) {
-                        C_MainWindow.fileTreeElements[i].classList.add('selected');
-                        if (C_MainWindow.lastFTE != -1) {
-                            C_MainWindow.fileTreeElements[C_MainWindow.lastFTE].classList.remove('selected');
-                        }
-                        C_MainWindow.lastFTE = i;
-                    }
-                    if (C_MainWindow.fileTreeElements[i].classList.contains('hidden')) {
-                        C_MainWindow.fileTreeElements[i].classList.remove('hidden');
-                    } else {
-                        C_MainWindow.fileTreeElements[i].classList.add('hidden');
-                    }
-                });
-            } else {
-                C_MainWindow.fileTreeElements[i].addEventListener('click', () => {
-                    // Fazendo seleção
-                    if (i != C_MainWindow.lastFTE) {
-                        C_MainWindow.fileTreeElements[i].classList.add('selected');
-                        if (C_MainWindow.lastFTE != -1) {
-                            C_MainWindow.fileTreeElements[C_MainWindow.lastFTE].classList.remove('selected');
-                        }
-                        C_MainWindow.lastFTE = i;
-                    }
-                });
+    static loadFile(f) {
+        // Definindo estrutura
+        let file = document.createElement('div');
+        file.setAttribute('class', 'file');
+        file.setAttribute('real-path', f.realPath);
+        file.innerText = f.name;
+
+        // Definindo eventos
+        file.addEventListener('click', () => {
+            // Fazendo seleção
+            if (!file.isSameNode(C_MainWindow.lastFTE)) {
+                file.classList.add('selected');
+                if (C_MainWindow.lastFTE != null) {
+                    C_MainWindow.lastFTE.classList.remove('selected');
+                }
+                C_MainWindow.lastFTE = file;
             }
-        }
+        });
+        return file; 
+    }
+    static loadDir(d) {
+        // Definindo estrutura
+        let dir = document.createElement('div');
+        dir.setAttribute('class', 'dir hidden');
+        dir.setAttribute('real-path', d.realPath);
+        let name = document.createElement('h3');
+        name.setAttribute('class', 'name');
+        name.innerText = d.name;
+        let content = document.createElement('div');
+        content.setAttribute('class', 'content');
+        C_MainWindow.loadFileTree(d.content).forEach((node) => {
+            content.appendChild(node);
+        });
+        dir.appendChild(name);
+        dir.appendChild(content);
+
+        // Definindo Eventos
+        dir.children[0].addEventListener('click', () => {
+            // Fazendo seleção
+            if (!dir.isSameNode(C_MainWindow.lastFTE)) {
+                dir.classList.add('selected');
+                if (C_MainWindow.lastFTE != null) {
+                    C_MainWindow.lastFTE.classList.remove('selected');
+                }
+                C_MainWindow.lastFTE = dir;
+            }
+            if (dir.classList.contains('hidden')) {
+                dir.classList.remove('hidden');
+            } else {
+                dir.classList.add('hidden');
+            }
+        });
+        
+        return dir;
     }
     static btn_deleteOnClick() {
-        if (C_MainWindow.lastFTE != -1) {
-           let tempE = C_MainWindow.fileTreeElements[C_MainWindow.lastFTE];
-
-            // Deletando Arquivo
-            if (tempE.classList.contains('dir')) {
-                C_MainWindow.fsm.deleteDir(tempE.getAttribute('real-path'));
+        if (C_MainWindow.lastFTE != null) {
+            // Deletando
+            if (C_MainWindow.lastFTE.classList.contains('dir')) {
+                C_MainWindow.fsm.deleteDir(C_MainWindow.lastFTE.getAttribute('real-path'));
             } else {
-                C_MainWindow.fsm.deleteFile(tempE.getAttribute('real-path'));
+                C_MainWindow.fsm.deleteFile(C_MainWindow.lastFTE.getAttribute('real-path'));
             }
-            
 
             // Removendo elemento gráfico do Painel de Sistema de Pasta
-            tempE.remove();
+            C_MainWindow.lastFTE.remove();
+            C_MainWindow.lastFTE = null;
+        }
+    }
+    static btn_create_fileOnClick() {
+        if (C_MainWindow.lastFTE != null) {
+            if (C_MainWindow.lastFTE.classList.contains('dir')) {
+                if (C_MainWindow.lastFTE.classList.contains('hidden')) {
+                    C_MainWindow.lastFTE.classList.remove('hidden');
+                }
+                let input = document.createElement('input');
+                input.addEventListener('blur', () => {
+                    if (input.value != '') {
+                        let file = C_MainWindow.fsm.createFile(input.value, C_MainWindow.lastFTE.getAttribute('real-path'));
+                        
+                        // Refazendo árvore
+                        C_MainWindow.lastFTE.children[1].appendChild(C_MainWindow.loadFile(file));
+                    }
+                    input.remove();
+                });
+                C_MainWindow.lastFTE.children[1].appendChild(input);
+                input.focus();
+            }
         }
     }
 }
