@@ -34,6 +34,7 @@ class C_MainWindow {
         this.pn_root_folder = document.getElementById('root-folder');
         this.pn_folder_tree = document.getElementById('folder-tree');
         this.btn_create_file = document.getElementById('btn-create-file');
+        this.btn_create_dir = document.getElementById('btn-create-dir');
         this.btn_open = document.getElementById('btn-open');
         this.btn_delete = document.getElementById('btn-delete');
 
@@ -44,6 +45,7 @@ class C_MainWindow {
 
         // Programando eventos do Painel de Sistema de Pastas
         this.pn_folder_tree.addEventListener('focus', this.pn_folder_treeOnFocus);
+        this.pn_folder_tree.addEventListener('keyup', this.pn_folder_treeOnKeyUp);
         this.btn_create_file.addEventListener('click', this.btn_create_fileOnClick);
         this.btn_open.addEventListener('click', this.btn_openOnClick);
         this.btn_delete.addEventListener('click', this.btn_deleteOnClick);
@@ -75,6 +77,11 @@ class C_MainWindow {
                 C_MainWindow.loadFileTree(C_MainWindow.fsm.buildFileTree(C_MainWindow.currentDir.realPath)).forEach((node) => {
                     C_MainWindow.pn_folder_tree.appendChild(node);
                 });
+                if (C_MainWindow.btn_create_file.disabled) {
+                    C_MainWindow.btn_create_file.disabled = false;
+                    C_MainWindow.btn_create_dir.disabled = false;
+                    C_MainWindow.btn_delete.disabled = false;
+                }
             }
         });
     }
@@ -104,7 +111,6 @@ class C_MainWindow {
                 C_MainWindow.lastFTE = file;
             }
         });
-        file.addEventListener('blur', C_MainWindow.sfeOnBlur);
         return file; 
     }
     static loadDir(d) {
@@ -112,42 +118,52 @@ class C_MainWindow {
         let dir = document.createElement('div');
         dir.setAttribute('class', 'dir hidden');
         dir.setAttribute('real-path', d.realPath);
+        
+        // Atribuindo filhos
+        dir.appendChild(C_MainWindow.loadDirName(d.name));
+        dir.appendChild(C_MainWindow.loadDirContent(d.content));
+        
+        return dir;
+    }
+    static loadDirName(n) {
+        // Definindo Estrutura
         let name = document.createElement('h3');
         name.setAttribute('class', 'name');
         name.setAttribute('tabindex', '0');
-        name.innerText = d.name;
-        let content = document.createElement('div');
-        content.setAttribute('class', 'content');
-        C_MainWindow.loadFileTree(d.content).forEach((node) => {
-            content.appendChild(node);
-        });
-        dir.appendChild(name);
-        dir.appendChild(content);
+        name.innerText = n;
 
         // Definindo Eventos
-        dir.children[0].addEventListener('focus', () => {
+        name.addEventListener('focus', () => {
             // Fazendo seleção
-            if (!dir.isSameNode(C_MainWindow.lastFTE)) {
-                console.log('funcional');
-                C_MainWindow.lastFTE = dir;
+            if (!name.parentElement.isSameNode(C_MainWindow.lastFTE)) {
+                C_MainWindow.lastFTE = name.parentElement;
             }
         });
-        dir.children[0].addEventListener('click', () => {
-            if (dir.classList.contains('hidden')) {
-                dir.classList.remove('hidden');
+        name.addEventListener('click', () => {
+            if (name.parentElement.classList.contains('hidden')) {
+                name.parentElement.classList.remove('hidden');
             } else {
-                dir.classList.add('hidden');
+                name.parentElement.classList.add('hidden');
             }
         });
-        
-        return dir;
+
+        return name;
+    }
+    static loadDirContent(c) {
+        let content = document.createElement('div');
+        content.setAttribute('class', 'content');
+        C_MainWindow.loadFileTree(c).forEach((node) => {
+            content.appendChild(node);
+        });
+
+        return content;
     }
     static btn_deleteOnClick() {
         if (C_MainWindow.lastFTE != null) {
             // Deletando
             if (C_MainWindow.lastFTE.classList.contains('dir')) {
                 C_MainWindow.fsm.deleteDir(C_MainWindow.lastFTE.getAttribute('real-path'));
-            } else {
+            } else if (C_MainWindow.lastFTE.classList.contains('file')) {
                 C_MainWindow.fsm.deleteFile(C_MainWindow.lastFTE.getAttribute('real-path'));
             }
 
@@ -190,7 +206,7 @@ class C_MainWindow {
                     if (e.key == 'Enter') {
                         input.blur();
                     }
-                })
+                });
                 C_MainWindow.lastFTE.appendChild(input);
                 input.focus();
             }
@@ -201,8 +217,46 @@ class C_MainWindow {
             C_MainWindow.lastFTE = C_MainWindow.pn_folder_tree;
         }
     }
-    static sfeOnBlur() {
-        C_MainWindow.lastFTE = null;
+    static pn_folder_treeOnKeyUp(e) {
+        if (e.key == 'F2') {
+            if (C_MainWindow.lastFTE != null && C_MainWindow.lastFTE.id != 'folder-tree') {
+                let input = document.createElement('input');
+                input.addEventListener('keyup', (e) => {
+                    if (e.key == 'Enter') {
+                        input.blur();
+                    }
+                });
+                
+                // Verificando o tipo de elemento para adaptar a forma como o input é colocado
+                if (C_MainWindow.lastFTE.classList.contains('dir')) {
+                    // Definindo Elemento de nome de diretório reserva;
+                    let dirName = C_MainWindow.loadDirName(C_MainWindow.lastFTE.children[0].innerText);
+
+                    input.value = C_MainWindow.lastFTE.children[0].innerText;
+                    input.addEventListener('blur', () => {
+                        if (input.value != '' && input.value != dirName.innerText) {
+                            let dir = C_MainWindow.fsm.rename(input.value, C_MainWindow.lastFTE.getAttribute('real-path'));
+                            dirName.innerText = dir.name;
+                            C_MainWindow.lastFTE.setAttribute('real-path', dir.realPath);
+                        }
+                        input.replaceWith(dirName);
+                    });
+                    C_MainWindow.lastFTE.children[0].replaceWith(input);  
+                } else {
+                    input.value = C_MainWindow.lastFTE.innerText;
+                    input.addEventListener('blur', () => {
+                        if (input.value != '' && input.value != C_MainWindow.lastFTE.innerText) {
+                            let file = C_MainWindow.fsm.rename(input.value, C_MainWindow.lastFTE.getAttribute('real-path'));
+                            C_MainWindow.lastFTE.innerText = file.name;
+                            C_MainWindow.lastFTE.setAttribute('real-path', file.realPath);
+                        }
+                        input.replaceWith(C_MainWindow.lastFTE);
+                    });
+                    C_MainWindow.lastFTE.replaceWith(input);    
+                }
+                input.focus();
+            }
+        }
     }
 }
 

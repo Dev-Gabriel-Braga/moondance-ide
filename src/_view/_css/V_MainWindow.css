@@ -177,7 +177,11 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
+        border-style: none;
+        background-color: transparent;
+        outline: none;
     }
+    #operation-bar > *:disabled { background-color: var(--black-lighter); }
     #operation-bar > *:hover { background-color: var(--black-lighter); }
     #editor-panel {
         display: flex;

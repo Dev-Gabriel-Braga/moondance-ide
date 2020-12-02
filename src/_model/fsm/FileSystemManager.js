@@ -10,11 +10,18 @@ class FileSystemManager {
     createFile(fileName, dir) {
         let file = new FileModel(fileName, path.join(dir, fileName));
         while (fs.existsSync(file.realPath)) {
-            console.log(file.realPath);
-            file = this.addCopyPrefix(file.name, file.realPath.slice(0, file.realPath.length - file.name.length));
+            file = this.addCopyPrefix(file.name, path.dirname(file.realPath));
         }
         fs.writeFileSync(file.realPath, "", { encoding: "utf-8" });
         return file;
+    }
+    rename(newName, pathOriginal) {
+        let info = { name: newName, realPath: path.join(path.dirname(pathOriginal), newName) };
+        while (fs.existsSync(info.realPath)) {
+            info = this.addCopyPrefix(info.name, path.dirname(info.realPath));
+        }
+        fs.renameSync(pathOriginal, info.realPath);
+        return info;
     }
     readFile(realPath) { return fs.readFileSync(realPath).toString(); }
     deleteFile(realPath) { fs.unlinkSync(realPath) }
@@ -30,10 +37,10 @@ class FileSystemManager {
         }
         fs.rmdirSync(realPath);
     }
-    addCopyPrefix(fileName, dir) {
-        let lio = (fileName.lastIndexOf('.') <= 0) ? fileName.length : fileName.lastIndexOf('.');
-        fileName = fileName.slice(0, lio).concat('-copy').concat(fileName.slice(lio));
-        return new FileModel(fileName, path.join(dir, fileName));
+    addCopyPrefix(name, dir) {
+        let lio = (name.lastIndexOf('.') <= 0) ? name.length : name.lastIndexOf('.');
+        name = name.slice(0, lio).concat('-copy').concat(name.slice(lio));
+        return { name: name, realPath: path.join(dir, name) };
     }
     
     // Métodos Formatação
