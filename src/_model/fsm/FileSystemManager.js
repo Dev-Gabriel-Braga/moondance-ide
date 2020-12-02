@@ -6,7 +6,7 @@ const DirModel = require('./DirModel');
 
 // Definindo Classe
 class FileSystemManager {
-    // Métodos de Manipulação de arquivos
+    // Métodos de Manipulação de arquivos e pastas
     createFile(fileName, dir) {
         let file = new FileModel(fileName, path.join(dir, fileName));
         while (fs.existsSync(file.realPath)) {
@@ -14,6 +14,14 @@ class FileSystemManager {
         }
         fs.writeFileSync(file.realPath, "", { encoding: "utf-8" });
         return file;
+    }
+    createDir(dirName, dirRoot) {
+        let dir = new DirModel(dirName, path.join(dirRoot, dirName));
+        while (fs.existsSync(dir.realPath)) {
+            dir = this.addCopyPrefix(dir.name, path.dirname(dir.realPath));
+        }
+        fs.mkdirSync(dir.realPath);
+        return dir;
     }
     rename(newName, pathOriginal) {
         let info = { name: newName, realPath: path.join(path.dirname(pathOriginal), newName) };

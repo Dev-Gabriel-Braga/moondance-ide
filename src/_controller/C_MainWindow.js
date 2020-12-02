@@ -46,7 +46,9 @@ class C_MainWindow {
         // Programando eventos do Painel de Sistema de Pastas
         this.pn_folder_tree.addEventListener('focus', this.pn_folder_treeOnFocus);
         this.pn_folder_tree.addEventListener('keyup', this.pn_folder_treeOnKeyUp);
+        this.pn_folder_tree.addEventListener('keypress', this.pn_folder_treeOnKeyPress);
         this.btn_create_file.addEventListener('click', this.btn_create_fileOnClick);
+        this.btn_create_dir.addEventListener('click', this.btn_create_dirOnClick);
         this.btn_open.addEventListener('click', this.btn_openOnClick);
         this.btn_delete.addEventListener('click', this.btn_deleteOnClick);
     }
@@ -87,13 +89,15 @@ class C_MainWindow {
     }
     static loadFileTree(fileTree) {
         let tempNL = [];
-        fileTree.forEach((v) => {
-            if (v.content == undefined) {
-               tempNL.push(C_MainWindow.loadFile(v));
-            } else {
-                tempNL.push(C_MainWindow.loadDir(v));
-            }
-        });
+        if (fileTree != undefined) {
+            fileTree.forEach((v) => {
+                if (v.content == undefined) {
+                   tempNL.push(C_MainWindow.loadFile(v));
+                } else {
+                    tempNL.push(C_MainWindow.loadDir(v));
+                }
+            });
+        }
         return tempNL;
     }
     static loadFile(f) {
@@ -159,11 +163,11 @@ class C_MainWindow {
         return content;
     }
     static btn_deleteOnClick() {
-        if (C_MainWindow.lastFTE != null) {
+        if (C_MainWindow.lastFTE != null && C_MainWindow.lastFTE.id != 'folder-tree') {
             // Deletando
             if (C_MainWindow.lastFTE.classList.contains('dir')) {
                 C_MainWindow.fsm.deleteDir(C_MainWindow.lastFTE.getAttribute('real-path'));
-            } else if (C_MainWindow.lastFTE.classList.contains('file')) {
+            } else {
                 C_MainWindow.fsm.deleteFile(C_MainWindow.lastFTE.getAttribute('real-path'));
             }
 
@@ -218,42 +222,112 @@ class C_MainWindow {
         }
     }
     static pn_folder_treeOnKeyUp(e) {
-        if (e.key == 'F2') {
-            if (C_MainWindow.lastFTE != null && C_MainWindow.lastFTE.id != 'folder-tree') {
+        switch (e.key) {
+            case 'F2':
+                if (C_MainWindow.lastFTE != null && C_MainWindow.lastFTE.id != 'folder-tree') {
+                    let input = document.createElement('input');
+                    input.addEventListener('keyup', (e) => {
+                        if (e.key == 'Enter') {
+                            input.blur();
+                        }
+                    });
+                    
+                    // Verificando o tipo de elemento para adaptar a forma como o input é colocado
+                    if (C_MainWindow.lastFTE.classList.contains('dir')) {
+                        // Definindo Elemento de nome de diretório reserva;
+                        let dirName = C_MainWindow.loadDirName(C_MainWindow.lastFTE.children[0].innerText);
+
+                        input.value = C_MainWindow.lastFTE.children[0].innerText;
+                        input.addEventListener('blur', () => {
+                            if (input.value != '' && input.value != dirName.innerText) {
+                                // Renomeando e corrigindo nome
+                                let dir = C_MainWindow.fsm.rename(input.value, C_MainWindow.lastFTE.getAttribute('real-path'));
+                                dirName.innerText = dir.name;
+
+                                // Corrigindo paths de subelementos
+                                C_MainWindow.updateSubPaths(C_MainWindow.lastFTE, C_MainWindow.lastFTE.getAttribute('real-path'), dir.realPath);
+
+                                // Corrigindo path
+                                C_MainWindow.lastFTE.setAttribute('real-path', dir.realPath);
+                            }
+                            input.replaceWith(dirName);
+                        });
+                        C_MainWindow.lastFTE.children[0].replaceWith(input);  
+                    C_MainWindow.lastFTE.children[0].replaceWith(input);  
+                        C_MainWindow.lastFTE.children[0].replaceWith(input);  
+                    } else {
+                        input.value = C_MainWindow.lastFTE.innerText;
+                        input.addEventListener('blur', () => {
+                            if (input.value != '' && input.value != C_MainWindow.lastFTE.innerText) {
+                                let file = C_MainWindow.fsm.rename(input.value, C_MainWindow.lastFTE.getAttribute('real-path'));
+                                C_MainWindow.lastFTE.innerText = file.name;
+                                C_MainWindow.lastFTE.setAttribute('real-path', file.realPath);
+                            }
+                            input.replaceWith(C_MainWindow.lastFTE);
+                        });
+                        C_MainWindow.lastFTE.replaceWith(input);    
+                    C_MainWindow.lastFTE.replaceWith(input);    
+                        C_MainWindow.lastFTE.replaceWith(input);    
+                    }
+                    input.focus();
+                }
+                break;
+        }
+    }
+    static pn_folder_treeOnKeyPress(e) {
+        switch (e.key) {
+            case '/': case '\\': case ':': case '*': case '?': case '<': case '>': case '|':
+                e.preventDefault();
+        }
+    }
+    static updateSubPaths(dir, oldPath, newPath) {
+        for (let i = 0; i < dir.children[1].childElementCount; i++) {
+            // Atualizando propriedade "realPath"
+            let newRealPath = dir.children[1].children[i].getAttribute('real-path').replace(oldPath, newPath);
+            dir.children[1].children[i].setAttribute('real-path', newRealPath);
+
+            // Gerando recursão caso o subelemento seja uma pasta
+            if (dir.children[1].children[i].classList.contains('dir')) {
+                C_MainWindow.updateSubPaths(dir.children[1].children[i], oldPath, newPath);
+            }
+        }
+    }
+    static btn_create_dirOnClick () {
+        if (C_MainWindow.lastFTE != null) {
+            if (C_MainWindow.lastFTE.classList.contains('dir')) {
+                if (C_MainWindow.lastFTE.classList.contains('hidden')) {
+                    C_MainWindow.lastFTE.classList.remove('hidden');
+                }
                 let input = document.createElement('input');
+                input.addEventListener('blur', () => {
+                    if (input.value != '') {
+                        let dir = C_MainWindow.fsm.createDir(input.value, C_MainWindow.lastFTE.getAttribute('real-path'));
+                        C_MainWindow.lastFTE.children[1].appendChild(C_MainWindow.loadDir(dir));
+                    }
+                    input.remove();
+                });
+                input.addEventListener('keyup', (e) => {
+                    if (e.key == 'Enter') {
+                        input.blur();
+                    }
+                })
+                C_MainWindow.lastFTE.children[1].appendChild(input);
+                input.focus();
+            } else if (C_MainWindow.lastFTE.id == 'folder-tree') {
+                let input = document.createElement('input');
+                input.addEventListener('blur', () => {
+                    if (input.value != '') {
+                        let dir = C_MainWindow.fsm.createDir(input.value, C_MainWindow.currentDir.realPath);
+                        C_MainWindow.lastFTE.appendChild(C_MainWindow.loadDir(dir));
+                    }
+                    input.remove();
+                });
                 input.addEventListener('keyup', (e) => {
                     if (e.key == 'Enter') {
                         input.blur();
                     }
                 });
-                
-                // Verificando o tipo de elemento para adaptar a forma como o input é colocado
-                if (C_MainWindow.lastFTE.classList.contains('dir')) {
-                    // Definindo Elemento de nome de diretório reserva;
-                    let dirName = C_MainWindow.loadDirName(C_MainWindow.lastFTE.children[0].innerText);
-
-                    input.value = C_MainWindow.lastFTE.children[0].innerText;
-                    input.addEventListener('blur', () => {
-                        if (input.value != '' && input.value != dirName.innerText) {
-                            let dir = C_MainWindow.fsm.rename(input.value, C_MainWindow.lastFTE.getAttribute('real-path'));
-                            dirName.innerText = dir.name;
-                            C_MainWindow.lastFTE.setAttribute('real-path', dir.realPath);
-                        }
-                        input.replaceWith(dirName);
-                    });
-                    C_MainWindow.lastFTE.children[0].replaceWith(input);  
-                } else {
-                    input.value = C_MainWindow.lastFTE.innerText;
-                    input.addEventListener('blur', () => {
-                        if (input.value != '' && input.value != C_MainWindow.lastFTE.innerText) {
-                            let file = C_MainWindow.fsm.rename(input.value, C_MainWindow.lastFTE.getAttribute('real-path'));
-                            C_MainWindow.lastFTE.innerText = file.name;
-                            C_MainWindow.lastFTE.setAttribute('real-path', file.realPath);
-                        }
-                        input.replaceWith(C_MainWindow.lastFTE);
-                    });
-                    C_MainWindow.lastFTE.replaceWith(input);    
-                }
+                C_MainWindow.lastFTE.appendChild(input);
                 input.focus();
             }
         }
