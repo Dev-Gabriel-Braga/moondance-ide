@@ -86,6 +86,7 @@
         flex-direction: row;
         --folder-panel-w: 270px;
         --footer-bars-h: 30px;
+        --root-folder-h: 55px;
     }
     #folder-panel {
         display: flex;
@@ -97,7 +98,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 53px;
+        height: var(--root-folder-h);
         padding: 10px;
         color: var(--ivory);
         font-size: 1.1em;
@@ -107,7 +108,7 @@
     }
     #folder-tree {
         flex-grow: 1;
-        height: calc(100vh - 93px - var(--footer-bars-h));
+        height: calc(100vh - 40px - var(--footer-bars-h) - var(--root-folder-h));
         background-color: var(--black-pluslighter);
         padding: 15px;
         overflow: auto;
@@ -190,7 +191,7 @@
     }
     #tabs {
         width: 100%;
-        height: fit-content;
+        height: var(--root-folder-h);
         display: flex;
         flex-direction: row;
         background-color: var(--black-lighter);
@@ -202,14 +203,23 @@
         display: flex;
         flex-direction: row;
         align-items: center;
-        padding: 4px 12px;
+        padding-right: 12px;
         color: var(--ivory);
         font-weight: 550;
+        white-space: nowrap;
         background-color: var(--black-lighter);
         border-right: 2px solid var(--black-light);
     }
     #tabs .tab.selected {
         background-color: var(--black-light);
+    }
+    #tabs .name {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        height: 100%;
+        padding: 0 15px;
+        vertical-align: middle;
     }
     #tabs .tab .x { cursor: pointer; }
     #tabs .tab .x::before {
@@ -217,7 +227,6 @@
         font-style: normal;
         font-weight: 300;
         font-size: 1.9em;
-        padding-left: 15px;
     }
     #ace-container {
         width: 100%;
