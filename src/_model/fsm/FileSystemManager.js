@@ -23,6 +23,7 @@ class FileSystemManager {
         fs.mkdirSync(dir.realPath);
         return dir;
     }
+    writeFile(realPath, text) { fs.writeFileSync(realPath, text, { encoding: "utf-8" }); }
     rename(newName, pathOriginal) {
         let info = { name: newName, realPath: path.join(path.dirname(pathOriginal), newName) };
         while (fs.existsSync(info.realPath)) {

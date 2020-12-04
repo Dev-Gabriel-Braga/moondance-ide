@@ -183,10 +183,19 @@ class C_MainWindow {
                 C_MainWindow.loadFileTree(C_MainWindow.fsm.buildFileTree(C_MainWindow.currentDir.realPath)).forEach((node) => {
                     C_MainWindow.pn_folder_tree.appendChild(node);
                 });
+
+                // Desbloqueando botões da barra de operações
                 if (C_MainWindow.btn_create_file.disabled) {
                     C_MainWindow.btn_create_file.disabled = false;
                     C_MainWindow.btn_create_dir.disabled = false;
                     C_MainWindow.btn_delete.disabled = false;
+                }
+
+                // Resetando Painel de edição de código
+                if (C_MainWindow.tabs.childElementCount > 0) {
+                    C_MainWindow.tabs.innerHTML = '';
+                    C_MainWindow.ace_editor.destroy();
+                    C_MainWindow.codeSessions = [];
                 }
             }
         });
@@ -219,7 +228,7 @@ class C_MainWindow {
                                 let dir = C_MainWindow.fsm.rename(input.value, C_MainWindow.lastFTE.getAttribute('real-path'));
                                 dirName.innerText = dir.name;
 
-                                // Corrigindo paths de subelementos
+                                // Corrigindo paths de subelementos (inclusive em abas abertas)
                                 C_MainWindow.updateSubPaths(C_MainWindow.lastFTE, C_MainWindow.lastFTE.getAttribute('real-path'), dir.realPath);
 
                                 // Corrigindo path
@@ -227,22 +236,22 @@ class C_MainWindow {
                             }
                             input.replaceWith(dirName);
                         });
-                        C_MainWindow.lastFTE.children[0].replaceWith(input);  
-                    C_MainWindow.lastFTE.children[0].replaceWith(input);  
-                        C_MainWindow.lastFTE.children[0].replaceWith(input);  
+                        C_MainWindow.lastFTE.children[0].replaceWith(input);
                     } else {
                         input.value = C_MainWindow.lastFTE.innerText;
                         input.addEventListener('blur', () => {
                             if (input.value != '' && input.value != C_MainWindow.lastFTE.innerText) {
                                 let file = C_MainWindow.fsm.rename(input.value, C_MainWindow.lastFTE.getAttribute('real-path'));
+                                
+                                // Atualizando nomes e paths de tabs abertas
+                                C_MainWindow.updateFileTabFileName(C_MainWindow.lastFTE.innerText, file.name, file.realPath); 
+                                
                                 C_MainWindow.lastFTE.innerText = file.name;
                                 C_MainWindow.lastFTE.setAttribute('real-path', file.realPath);
                             }
                             input.replaceWith(C_MainWindow.lastFTE);
                         });
-                        C_MainWindow.lastFTE.replaceWith(input);    
-                    C_MainWindow.lastFTE.replaceWith(input);    
-                        C_MainWindow.lastFTE.replaceWith(input);    
+                        C_MainWindow.lastFTE.replaceWith(input);  
                     }
                     input.focus();
                 }
@@ -257,14 +266,15 @@ class C_MainWindow {
     }
 
     // Métodos Especiais
-    static loadTab(name, sessionIndex) {
+    static loadTab(fileName, fileRealPath, sessionIndex) {
         // Definindo estrutura
         let tab = document.createElement('div');
         tab.setAttribute('class', 'tab selected');
+        tab.setAttribute('file-real-path', fileRealPath);
         tab.setAttribute('session-index', sessionIndex);
         let x = document.createElement('i');
         x.setAttribute('class', 'x');
-        tab.appendChild(C_MainWindow.loadTabName(name));
+        tab.appendChild(C_MainWindow.loadTabName(fileName));
         tab.appendChild(x);
 
         if (C_MainWindow.lastTab != null) {
@@ -359,7 +369,7 @@ class C_MainWindow {
             }
 
             // Gerando Tab e sessão do arquivo
-            C_MainWindow.tabs.appendChild(C_MainWindow.loadTab(file.innerText, C_MainWindow.codeSessions.length));
+            C_MainWindow.tabs.appendChild(C_MainWindow.loadTab(file.innerText, file.getAttribute('real-path'), C_MainWindow.codeSessions.length));
             C_MainWindow.codeSessions.push(new EditSession(C_MainWindow.fsm.readFile(file.getAttribute('real-path'))));
             C_MainWindow.ace_editor.setSession(C_MainWindow.codeSessions[C_MainWindow.codeSessions.length -1]);
         });
@@ -413,14 +423,19 @@ class C_MainWindow {
     }
     static updateSubPaths(dir, oldPath, newPath) {
         for (let i = 0; i < dir.children[1].childElementCount; i++) {
-            // Atualizando propriedade "realPath"
+            // Gerando "realPath" atualizado
             let newRealPath = dir.children[1].children[i].getAttribute('real-path').replace(oldPath, newPath);
-            dir.children[1].children[i].setAttribute('real-path', newRealPath);
 
             // Gerando recursão caso o subelemento seja uma pasta
             if (dir.children[1].children[i].classList.contains('dir')) {
                 C_MainWindow.updateSubPaths(dir.children[1].children[i], oldPath, newPath);
+            } else {
+                // Atualizando paths de abas, se houverem abas abertas
+                C_MainWindow.updateFileTabDirPath(dir.children[1].children[i].innerText, newRealPath);
             }
+
+            // Atualizando propriedade "real-path"
+            dir.children[1].children[i].setAttribute('real-path', newRealPath);
         }
     }
     static uptadeTabSessionIndexes(start, end) {
@@ -428,9 +443,42 @@ class C_MainWindow {
             C_MainWindow.tabs.children[i].setAttribute('session-index', i - 1);
         }
     }
+    static updateFileTabDirPath(fileName, newPath) {
+        for (let i = 0; i < C_MainWindow.tabs.childElementCount; i++) {
+            if (C_MainWindow.tabs.children[i].children[0].innerText == fileName) {
+                C_MainWindow.tabs.children[i].setAttribute('file-real-path', newPath);
+            }
+        }
+    }
+    static updateFileTabFileName(fileName, newFileName, newFilePath) {
+        for (let i = 0; i < C_MainWindow.tabs.childElementCount; i++) {
+            if (C_MainWindow.tabs.children[i].children[0].innerText == fileName) {
+                C_MainWindow.tabs.children[i].children[0].innerText = newFileName;
+                C_MainWindow.tabs.children[i].setAttribute('file-real-path', newFilePath);
+            }
+        }
+    }
     static configureAceEditor() {
-        this.ace_editor = ace.edit(document.getElementById('ace-editor'));
-        this.ace_editor.setTheme('ace/theme/dracula');
+        C_MainWindow.ace_editor = ace.edit(document.getElementById('ace-editor'));
+        C_MainWindow.ace_editor.setTheme('ace/theme/dracula');
+        C_MainWindow.ace_editor.commands.addCommand({
+            name: 'Save File',
+            bindKey: {
+                win: 'Ctrl-S',
+                mac: 'Command-S'
+            },
+            exec: C_MainWindow.saveFile,
+            readOnly: true
+        });
+        C_MainWindow.ace_editor.on('change', () => {
+            C_MainWindow.lastTab.children[1].classList.add('not-saved');
+        });
+    }
+
+    // Eventos do Ace Editor
+    static saveFile() {
+        C_MainWindow.fsm.writeFile(C_MainWindow.lastTab.getAttribute('file-real-path'), C_MainWindow.ace_editor.session.getValue());
+        C_MainWindow.lastTab.children[1].classList.remove('not-saved');
     }
 }
 

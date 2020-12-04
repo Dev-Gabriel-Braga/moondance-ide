@@ -228,6 +228,9 @@
         font-weight: 300;
         font-size: 1.9em;
     }
+    #tabs .tab .x.not-saved::before {
+        content: '●';
+    }
     #ace-container {
         width: 100%;
         flex-grow: 1;
