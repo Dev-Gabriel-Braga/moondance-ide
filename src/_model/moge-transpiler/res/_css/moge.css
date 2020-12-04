@@ -1,0 +1,308 @@
+/* Inicial Settings */
+    @font-face {
+        font-family: Fira_Code;
+        src: url('../_fonts/FiraCode-VF.ttf');
+    }
+    @font-face {
+        font-family: Quicksand_Bold;
+        src: url('../_fonts/Quicksand_Bold.otf');
+    }
+    :root {
+        font-family: QuickSand_Bold;
+        --white: hsl(0, 0%, 95%);
+        --black: hsl(0, 0%, 25%);
+        --black-2: hsl(0, 0%, 5%);
+        --blue: hsl(203, 90%, 19%);
+        --blue-2: hsl(200, 90%, 40%);
+        --green: hsl(163, 100%, 33%);
+        --red: hsl(357, 73%, 50%);
+        --purple: hsl(323, 87%, 20%);
+        --purple-2: hsl(323, 87%, 40%);                                                
+        --purple-3: hsl(323, 87%, 60%);
+    }
+    *:not(ul) {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    ul {
+        margin-top: 0.3em;
+        margin-bottom: 0.3em;
+    }
+    body {
+        font-size: 25px;
+    }
+/****/
+
+/* Annotation */
+    #annotation {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        border: 4px solid var(--black-2);
+        background-image: url('../_media/back.svg');
+        user-select: none;
+    }
+/****/
+
+/* Separator Title */
+    #title {
+        width: 100%;
+        border-bottom: 4px solid var(--black-2); 
+    }
+    #title .content {
+        width: 100%;
+        padding: 0.4em;
+        background-color: var(--black);
+        color: white;
+        font-size: 1.6em;
+        text-align: center;
+        text-shadow: var(--black-2) 3px 3px;
+    }
+/****/
+
+/* Data Area */
+    #data-area {
+        flex-grow: 1;
+        width: 100%;
+        padding: 1.5em;
+    }
+    #data-area *:last-child {
+        margin-bottom: 0;
+    }
+/****/
+
+/* Note */
+    .note {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        margin-bottom: 1em;
+        border-left: none;
+        border-radius: 4px;
+        background-color: white;
+    }
+    .note.green {
+        border: 4px solid var(--green);
+    }
+    .note.red {
+        border: 4px solid var(--red);
+    }
+    .note > .icon-plus {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.4em;
+        border-right: 4px solid transparent;
+        color: white;
+        font-style: normal;
+        font-family: sans-serif;
+        font-weight: 800;
+    }
+    .note.red > .icon-plus {
+        background-color: var(--red);
+    }
+    .note.green > .icon-plus {
+        background-color: var(--green);
+    }
+    .note > .icon-plus::after {
+        content: "+";
+        font-family: Fira_Code;
+        transition: transform 0.5s;
+    }
+    .note:hover > .icon-plus::after {
+        transform: rotate(90deg);
+    }
+    .note > .content {
+        width: 100%;
+        padding: 0.4em;
+        line-height: 1.1em;
+        font-size: 1em;
+    }
+    .note.red > .content {
+        color: var(--red);
+    }
+    .note.green > .content {
+        color: var(--green);
+    }
+/****/
+
+/* Media */
+    .media {
+        width: 100%;
+        margin-bottom: 1em;
+        border-radius: 4px;
+        background-color: var(--purple-2);
+        position: relative;
+    }
+    .media > .content {
+        border: 4px solid var(--purple);
+        border-bottom: none;
+        overflow: auto;
+    }
+    .media > .content::-webkit-scrollbar {
+        background-color: var(--purple);
+        width: 10px;
+        height: 10px;
+    }
+    .media > .content::-webkit-scrollbar-corner {
+        background-color: var(--purple);
+    }
+    .media > .content::-webkit-scrollbar-thumb{
+        background-color: var(--purple-3);
+    }
+    .media.closed > .content {
+        display: none;
+    }
+    .media > .content > * {
+        width: 100%;
+    }
+    .media > .btn-zoom {
+        position: absolute;
+        bottom: 75px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 45px;
+        height: 45px;
+        background-color: rgba(0, 0, 0, 0.7);
+        border-radius: 5px;
+        color: white;
+        cursor: pointer;
+    }
+    .media.closed > .btn-zoom {
+        display: none;
+    }
+    .media > .btn-zoom:hover {
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+    .media > .btn-zoom#zoom-plus {
+        right: 80px;
+    }
+    .media > .btn-zoom#zoom-plus::after {
+        content: "+";
+    }
+    .media > .btn-zoom#zoom-minus {
+        right: 25px;
+    }
+    .media > .btn-zoom#zoom-minus::after {
+        content: "-";
+    }
+    .media > span.desc {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        margin-top: -5px;
+        border: 4px solid var(--purple);
+        border-radius: 0 0 4px 4px;
+    }
+    .media.closed > span.desc {
+        border-radius: 4px;
+    }
+    .media > span.desc:hover {
+        background-color: white;
+    }
+    .media > span.desc:hover > .content {
+        color: var(--purple-2);
+    }
+    .media > span.desc > .icon-at {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.4em;
+        background-color: var(--purple);
+        border-right: 4px solid transparent;
+        color: white;
+        font-style: normal;
+        font-family: sans-serif;
+        font-weight: 800;
+    }
+    .media > span.desc > .icon-at::after {
+        content: "@";
+        font-family: Fira_Code;
+    }
+    .media > span.desc > span.content {
+        padding: 0.5em;
+        color: white;
+    }
+/****/
+
+/* Block */
+    .block {
+        width: 100%;
+        margin-bottom: 1em;
+    }
+    .block *:last-child {
+        margin-bottom: 0;
+    }
+    .block > .header {
+        display: flex;
+        flex-direction: row;
+        width: fit-content;
+        border: 4px solid var(--blue);
+        border-bottom: none;
+        border-radius: 12px 12px 0 0;
+        background-color: var(--blue-2);
+        color: white;
+        font-size: 1.1em;
+    }
+    .block > .header:hover {
+        background-color: white;
+    }
+    .block > .header:hover .name {
+        color: var(--blue-2);
+    }
+    .block > .header > .icon-exc {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.4em 0.6em;
+        background-color: var(--blue);
+        border-right: 4px solid transparent;
+        color: white;
+        font-style: normal;
+        font-family: sans-serif;
+        font-weight: 800;
+    }
+    .block > .header > .icon-exc::after {
+        content: "!";
+        font-family: Fira_Code;
+    }
+    .block > .header > .name {
+        padding: 0.5em;
+    }
+    .block > .content {
+        background-color: var(--white);
+        border: 4px solid var(--blue);
+        padding: 0.5em;
+    }
+
+    .block.closed > .header {
+        border: 4px solid var(--blue);
+        border-radius: 12px;
+        width: 100%;
+    }
+    .block.closed > .header > .name {
+        width: 100%;
+        text-align: center;
+    }
+    .block.closed > .content {
+        display: none;
+    }
+/****/
+
+/* Separator Footer */
+    #footer {
+        width: 100%;
+        border-top: 4px solid var(--black-2);
+        padding: 0.3em;
+        background-color: var(--black);
+        color: white;
+        font-size: 1.3em;
+        text-align: center;
+        text-shadow: var(--black-2) 3px 3px;
+    }
+    #footer::after {
+        content: "+ + +";
+    }
+/****/

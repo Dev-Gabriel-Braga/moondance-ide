@@ -1,6 +1,7 @@
 // Importanto Bicliotecas
 const { remote } = require('electron');
 const FileSystemManager = require('../../_model/fsm/FileSystemManager');
+const MogeTranspiler = require('../../_model/moge-transpiler/MogeTranspiler');
 const EditSession = ace.require('ace/edit_session').EditSession;
 
 // Definindo Classe
@@ -29,6 +30,10 @@ class C_MainWindow {
     static tabs;
     static lastTab = null;
     static codeSessions = [];
+    static codeLine;
+    static codeColumn;
+    static viewGraphic;
+    static transMoge;
 
     // Método Principal
     static main() {
@@ -47,6 +52,9 @@ class C_MainWindow {
         this.btn_delete = document.getElementById('btn-delete');
         this.tabs = document.getElementById('tabs');
         this.ace_container = document.getElementById('ace-container');
+        this.codeLine = document.getElementById('line-count');
+        this.codeColumn = document.getElementById('column-count');
+        this.viewGraphic = document.getElementById('view-graphic');
 
         // Programando eventos da barra de título
         this.btn_min.addEventListener('click', this.btn_minOnClick);
@@ -61,6 +69,9 @@ class C_MainWindow {
         this.btn_create_dir.addEventListener('click', this.btn_create_dirOnClick);
         this.btn_open.addEventListener('click', this.btn_openOnClick);
         this.btn_delete.addEventListener('click', this.btn_deleteOnClick);
+
+        // Programando evento de visualização gráfica de arquivos moge
+        this.viewGraphic.addEventListener('click', this.viewGraphicOnClick); 
     }
 
     // Métodos de Eventos DOOM
@@ -178,7 +189,14 @@ class C_MainWindow {
             if (res.filePaths[0] != undefined) {
                 // Salvando pasta aberta e gerando árvore de arquivos
                 C_MainWindow.currentDir = C_MainWindow.fsm.decompPath(res.filePaths[0]);
-                C_MainWindow.pn_root_folder.innerText = C_MainWindow.currentDir.name;
+
+                // Verificando tamanho do nome da pasta
+                if (C_MainWindow.currentDir.name.length < 23) {
+                    C_MainWindow.pn_root_folder.innerText = C_MainWindow.currentDir.name;
+                } else {
+                    C_MainWindow.pn_root_folder.innerText = C_MainWindow.currentDir.name.slice(0, 21).concat('...');
+                }
+                
                 C_MainWindow.pn_folder_tree.innerHTML = '';
                 C_MainWindow.loadFileTree(C_MainWindow.fsm.buildFileTree(C_MainWindow.currentDir.realPath)).forEach((node) => {
                     C_MainWindow.pn_folder_tree.appendChild(node);
@@ -264,6 +282,15 @@ class C_MainWindow {
                 e.preventDefault();
         }
     }
+    static viewGraphicOnClick() {
+        if (!C_MainWindow.viewGraphic.classList.contains('selected')) {
+            C_MainWindow.viewGraphic.classList.add('selected');
+            C_MainWindow.loadMoge();
+        } else {
+            C_MainWindow.viewGraphic.classList.remove('selected');
+            C_MainWindow.ace_container.children[1].remove();
+        }
+    }
 
     // Métodos Especiais
     static loadTab(fileName, fileRealPath, sessionIndex) {
@@ -329,6 +356,11 @@ class C_MainWindow {
 
                 // Mudando sessão do Ace Editor
                 C_MainWindow.ace_editor.setSession(C_MainWindow.codeSessions[name.parentElement.getAttribute('session-index')]);
+            
+                if (C_MainWindow.ace_container.childElementCount > 1) {
+                    C_MainWindow.ace_container.children[1].remove();
+                    C_MainWindow.viewGraphic.classList.remove('selected');
+                }
             }
         });
 
@@ -371,7 +403,7 @@ class C_MainWindow {
             // Gerando Tab e sessão do arquivo
             C_MainWindow.tabs.appendChild(C_MainWindow.loadTab(file.innerText, file.getAttribute('real-path'), C_MainWindow.codeSessions.length));
             C_MainWindow.codeSessions.push(new EditSession(C_MainWindow.fsm.readFile(file.getAttribute('real-path'))));
-            C_MainWindow.ace_editor.setSession(C_MainWindow.codeSessions[C_MainWindow.codeSessions.length -1]);
+            C_MainWindow.insertCodeSession(file.innerText, C_MainWindow.codeSessions[C_MainWindow.codeSessions.length -1]);
         });
 
         return file; 
@@ -421,6 +453,20 @@ class C_MainWindow {
 
         return content;
     }
+    static loadMoge() {
+        // Configurando Transpilador
+        if (C_MainWindow.transMoge == null) {
+            C_MainWindow.transMoge = new MogeTranspiler();
+            C_MainWindow.transMoge.css_path = '../../_model/moge-transpiler/res/_css/moge.css';
+            C_MainWindow.transMoge.js_path = '../../_model/moge-transpiler/res/_js/moge.js';
+        }
+
+        // Criando elemento que conterá a página html de resultado
+        let html_result = document.createElement('iframe');
+        html_result.srcdoc = C_MainWindow.transMoge.transpile(C_MainWindow.ace_editor.session.getValue());
+
+        C_MainWindow.ace_container.appendChild(html_result);
+    }
     static updateSubPaths(dir, oldPath, newPath) {
         for (let i = 0; i < dir.children[1].childElementCount; i++) {
             // Gerando "realPath" atualizado
@@ -453,8 +499,12 @@ class C_MainWindow {
     static updateFileTabFileName(fileName, newFileName, newFilePath) {
         for (let i = 0; i < C_MainWindow.tabs.childElementCount; i++) {
             if (C_MainWindow.tabs.children[i].children[0].innerText == fileName) {
+                // Atualizando nome e path
                 C_MainWindow.tabs.children[i].children[0].innerText = newFileName;
                 C_MainWindow.tabs.children[i].setAttribute('file-real-path', newFilePath);
+
+                // Atualizando modo da sessão
+                C_MainWindow.defineSessionMode(newFileName, C_MainWindow.tabs.children[i].getAttribute('session-index'));
             }
         }
     }
@@ -470,15 +520,46 @@ class C_MainWindow {
             exec: C_MainWindow.saveFile,
             readOnly: true
         });
-        C_MainWindow.ace_editor.on('change', () => {
-            C_MainWindow.lastTab.children[1].classList.add('not-saved');
-        });
+        C_MainWindow.ace_editor.on('change', C_MainWindow.codeChanged);
+    }
+    static insertCodeSession(fileName, codeSession) {
+        // Colocando sessão no Editor
+        C_MainWindow.ace_editor.setSession(codeSession);
+
+        // Verificando a extensão do arquivo
+        C_MainWindow.defineSessionMode(fileName);
+
+        // Definindo evento de sessão
+        C_MainWindow.ace_editor.session.selection.on("changeCursor", C_MainWindow.cursorChanged);
+    }
+    static defineSessionMode(fileName, sessionIndex = null) {
+        let session = (sessionIndex == null) ? C_MainWindow.ace_editor.session : C_MainWindow.codeSessions[sessionIndex];
+        switch (fileName.slice(fileName.lastIndexOf('.'))) {
+            case '.html':case '.htm':
+                session.setMode('ace/mode/html');
+                break;
+
+            case '.js':
+                session.setMode('ace/mode/javascript');
+                break;
+            
+            default:
+                session.setMode('ace/mode/plain_text');
+        }
     }
 
     // Eventos do Ace Editor
     static saveFile() {
         C_MainWindow.fsm.writeFile(C_MainWindow.lastTab.getAttribute('file-real-path'), C_MainWindow.ace_editor.session.getValue());
         C_MainWindow.lastTab.children[1].classList.remove('not-saved');
+    }
+    static codeChanged() {
+        C_MainWindow.lastTab.children[1].classList.add('not-saved');
+    }
+    static cursorChanged() {
+        let { row, column } = C_MainWindow.ace_editor.selection.getCursor();
+        C_MainWindow.codeLine.innerText = `Row: ${row + 1}`;
+        C_MainWindow.codeColumn.innerText = `Col: ${column + 1}`; 
     }
 }
 
