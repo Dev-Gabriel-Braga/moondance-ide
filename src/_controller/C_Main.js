@@ -21,6 +21,7 @@ class C_Main {
     }
     static createWindow() {
         this.v_mainWindow = new BrowserWindow({
+            icon: 'src/_view/_img/md-logo-100x100.ico',
             width: 1280,
             height: 720,
             minWidth: 600,
@@ -31,9 +32,9 @@ class C_Main {
                 enableRemoteModule: true
             }
         });
-        this.v_mainWindow.loadFile('../_view/_html/V_MainWindow.html');
+        this.v_mainWindow.loadFile('src/_view/_html/V_MainWindow.html');
         this.v_mainWindow.removeMenu();
-        this.v_mainWindow.openDevTools();
+        this.v_mainWindow.maximize();
     }
 }
 

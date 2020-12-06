@@ -1,26 +1,47 @@
 {
-  "name": "moondance-ide",
-  "version": "0.0.1",
-  "description": "Uma IDE para a linguagem de marcação de anotações Moge.",
-  "main": "./src/_controller/C_Main.js",
-  "scripts": {
-    "start": "electron ./src/_controller/C_Main.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Dev-Gabriel-Braga/moondance-ide.git"
-  },
-  "keywords": [
-    "Moge",
-    "IDE"
-  ],
-  "author": "Dev-Gabriel-Braga",
-  "license": "GPL-3.0",
-  "bugs": {
-    "url": "https://github.com/Dev-Gabriel-Braga/moondance-ide/issues"
-  },
-  "homepage": "https://github.com/Dev-Gabriel-Braga/moondance-ide#readme",
-  "dependencies": {
-    "electron": "^11.0.0"
-  }
+	"name": "moondance-ide",
+	"version": "0.0.1",
+	"description": "An IDE for Annotation Markup language Moge.",
+	"main": "./src/_controller/C_Main.js",
+	"build": {
+		"appId": "moondance-ide",
+		"productName": "Moondance IDE",
+		"copyright": "Copyright © 2020 Dev-Gabriel-Braga",
+		"win": {
+			"target": [
+				"nsis"
+			],
+			"icon": "./src/_view/_img/md-logo-100x100.ico",
+			"requestedExecutionLevel": "requireAdministrator"
+		},
+		"nsis": {
+			"installerIcon": "./src/_view/_img/md-logo-100x100.ico",
+			"uninstallerIcon": "./src/_view/_img/md-logo-100x100.ico",
+			"license": "LICENSE",
+			"oneClick": false,
+			"allowToChangeInstallationDirectory": true
+		}
+	},
+	"scripts": {
+		"start": "electron .",
+		"build": "electron-builder"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Dev-Gabriel-Braga/moondance-ide.git"
+	},
+	"keywords": [
+		"Moge",
+		"IDE"
+	],
+	"author": "Dev-Gabriel-Braga",
+	"license": "GPL-3.0",
+	"bugs": {
+		"url": "https://github.com/Dev-Gabriel-Braga/moondance-ide/issues"
+	},
+	"homepage": "https://github.com/Dev-Gabriel-Braga/moondance-ide#readme",
+	"devDependencies": {
+		"electron-builder": "^22.9.1",
+		"electron": "^11.0.3"
+	}
 }
