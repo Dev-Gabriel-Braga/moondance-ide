@@ -177,13 +177,9 @@
         flex-direction: row;
         align-items: center;
         justify-content: center;
-        cursor: pointer;
-        border-style: none;
-        background-color: transparent;
-        outline: none;
     }
-    #operation-bar > *:disabled { background-color: var(--black-lighter); }
-    #operation-bar > *:hover { background-color: var(--black-lighter); }
+    #operation-bar > .btn:disabled { background-color: var(--black-lighter); }
+    #operation-bar > .btn:hover { background-color: var(--black-lighter); }
     #editor-panel {
         display: flex;
         flex-direction: column;
@@ -268,6 +264,8 @@
         align-items: center;
         padding: 0 15px;
     }
+    #status-bar > .btn:disabled { background-color: var(--black-lighter); }
+    #status-bar > .btn:hover { background-color: var(--black-lighter); }
     #line-count, #column-count {
         width: 110px;
         display: flex;
@@ -279,8 +277,13 @@
     }
     #view-graphic {
         padding: 0 15px;
-        cursor: pointer;
     }
     #view-graphic:hover { background-color: var(--black-lighter); }
     #view-graphic.selected { background-color: var(--violet-light); }
+    .btn {
+        cursor: pointer;
+        border-style: none;
+        background-color: transparent;
+        outline: none;
+    }
 /****/

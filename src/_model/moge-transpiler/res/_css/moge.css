@@ -31,7 +31,15 @@
     }
     body {
         font-size: 25px;
+        word-wrap: break-word;
     }
+    ::-webkit-scrollbar { 
+        height: 8px;
+        width: 8px;
+        background-color: var(--black-2);
+    }
+    ::-webkit-scrollbar-button { display: none; }
+    ::-webkit-scrollbar-thumb { background-color: var(--black); }
 /****/
 
 /* Annotation */

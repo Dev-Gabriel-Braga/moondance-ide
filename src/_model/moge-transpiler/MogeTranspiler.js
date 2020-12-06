@@ -5,7 +5,7 @@ class MogeTranspiler {
     // Método Construtor
     constructor() {
         this.input_text = '';
-        this.output_text = '<!doctype html>\n';
+        this.output_text = '';
         this.css_path = './_css/moge.css';
         this.js_path = './_js/moge.js';
         this.def_ident = 4;
@@ -17,6 +17,9 @@ class MogeTranspiler {
 
     // Método de Transpilação
     transpile(moge_code) {
+        // Iniciando output
+        this.output_text = '<!doctype html>\n';
+
         // Armazenando valores
         this.input_text = moge_code;
         var temp_end;
