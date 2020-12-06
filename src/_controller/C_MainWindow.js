@@ -71,7 +71,7 @@ class C_MainWindow {
         this.btn_delete.addEventListener('click', this.btn_deleteOnClick);
 
         // Programando evento de visualização gráfica de arquivos moge
-        this.viewGraphic.addEventListener('click', this.viewGraphicOnClick); 
+        this.viewGraphic.addEventListener('click', this.viewGraphicOnClick);
     }
 
     // Métodos de Eventos DOOM
@@ -515,7 +515,7 @@ class C_MainWindow {
     }
     static configureAceEditor() {
         C_MainWindow.ace_editor = ace.edit(document.getElementById('ace-editor'));
-        C_MainWindow.ace_editor.setTheme('ace/theme/dracula');
+        C_MainWindow.ace_editor.setTheme('ace/theme/moon-dark');
         C_MainWindow.ace_editor.commands.addCommand({
             name: 'Save File',
             bindKey: {

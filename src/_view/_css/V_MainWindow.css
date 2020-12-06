@@ -231,6 +231,7 @@
         width: 100%;
         flex-grow: 1;
         position: relative;
+        background-color: var(--black-light);
     }
     #ace-container iframe {
         position: absolute;
@@ -243,7 +244,7 @@
     #ace-editor {
         position: absolute;
         z-index: 1;
-        top: 0;
+        top: 15px;
         right: 0;
         left: 0;
         bottom: 0;

@@ -4,7 +4,7 @@
   "description": "Uma IDE para a linguagem de marcação de anotações Moge.",
   "main": "./src/_controller/C_Main.js",
   "scripts": {
-    "test": "electron ./src/_controller/C_Main.js"
+    "start": "electron ./src/_controller/C_Main.js"
   },
   "repository": {
     "type": "git",
